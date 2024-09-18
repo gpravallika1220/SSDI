@@ -81,4 +81,30 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// New route to delete multiple records by ids
+router.post("/deleteMany", async (req, res) => {
+  try {
+    const { ids } = req.body; // Get the array of ids from the request body
+
+    if (!ids || ids.length === 0) {
+      return res.status(400).send("No IDs provided");
+    }
+
+    const objectIds = ids.map((id) => new ObjectId(id)); // Convert each id to ObjectId
+
+    const collection = db.collection("records");
+    const result = await collection.deleteMany({ _id: { $in: objectIds } });
+    console.log(result);
+
+    if (result.deletedCount === 0) {
+      return res.status(404).send("No records found to delete");
+    }
+
+    // res.status(200).send({ message: Deleted {result.deletedCount} records });
+  }catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting records");
+  }
+});
+
 export default router;
